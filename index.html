@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📺 Télévision</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="tv-container">
+        <div class="tv-header">
+            <h1>📺 TÉLÉVISION</h1>
+            <a href="admin.html" class="admin-btn">⚙️ Admin</a>
+        </div>
+
+        <div class="tv-content">
+            <div class="channel-selector">
+                <label for="channels">Sélectionner une chaîne:</label>
+                <select id="channels" onchange="changeChannel()">
+                    <option value="">-- Choisir une chaîne --</option>
+                </select>
+            </div>
+
+            <div class="video-player">
+                <video id="videoPlayer" width="100%" height="500" controls>
+                    <source src="" type="video/mp4">
+                </video>
+            </div>
+
+            <div class="player-info">
+                <div class="info-item">
+                    <strong>Chaîne actuelle:</strong>
+                    <span id="currentChannel">Aucune</span>
+                </div>
+                <div class="info-item">
+                    <strong>Vidéo:</strong>
+                    <span id="currentVideo">-</span>
+                </div>
+                <div class="info-item">
+                    <strong>Prochainement:</strong>
+                    <span id="nextVideo">-</span>
+                </div>
+            </div>
+
+            <div class="playlist-section">
+                <h2>📋 Playlist</h2>
+                <ul id="playlist" class="playlist"></ul>
+            </div>
+
+            <div id="adModal" class="ad-modal hidden">
+                <div class="ad-content">
+                    <div class="ad-timer"><span id="adTimer">5</span>s</div>
+                    <div class="ad-video">
+                        <video id="adPlayer" width="100%" height="300" controls>
+                            <source src="" type="video/mp4">
+                        </video>
+                    </div>
+                    <p class="ad-text">Publicité - Fermeture automatique dans <span id="adCountdown">5</span> secondes</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tv-footer">
+            <p>© 2024 Télévision - App HTML/CSS/JS</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
