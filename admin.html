@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📺 Admin - Télévision</title>
+    <link rel="stylesheet" href="admin-style.css">
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>⚙️ PANNEAU ADMINISTRATEUR</h1>
+            <a href="index.html" class="back-btn">← Retour à la TV</a>
+        </div>
+
+        <div class="admin-content">
+            <section class="admin-section">
+                <h2>📺 Gestion des Chaînes</h2>
+                <div class="form-group">
+                    <input type="text" id="channelName" placeholder="Nom de la chaîne (ex: France 1)">
+                    <input type="text" id="channelDesc" placeholder="Description">
+                    <button onclick="addChannel()">➕ Ajouter Chaîne</button>
+                </div>
+                <div class="channels-list">
+                    <h3>Chaînes existantes:</h3>
+                    <ul id="channelsList"></ul>
+                </div>
+            </section>
+
+            <section class="admin-section">
+                <h2>🎬 Gestion des Vidéos</h2>
+                <div class="form-group">
+                    <label>Sélectionner une chaîne:</label>
+                    <select id="videosChannel" onchange="loadChannelVideos()">
+                        <option value="">-- Choisir une chaîne --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="videoTitle" placeholder="Titre de la vidéo">
+                    <input type="file" id="videoFile" accept="video/mp4">
+                    <input type="number" id="videoDuration" placeholder="Durée (secondes)">
+                    <button onclick="addVideo()">➕ Ajouter Vidéo</button>
+                </div>
+                <div class="videos-list">
+                    <h3>Vidéos de la chaîne:</h3>
+                    <ul id="videosList"></ul>
+                </div>
+            </section>
+
+            <section class="admin-section">
+                <h2>📢 Gestion des Publicités</h2>
+                <div class="form-group">
+                    <input type="text" id="adTitle" placeholder="Titre de la pub">
+                    <input type="file" id="adFile" accept="video/mp4">
+                    <input type="number" id="adDuration" placeholder="Durée (secondes)">
+                    <button onclick="addAd()">➕ Ajouter Pub</button>
+                </div>
+                <div class="ads-list">
+                    <h3>Publicités disponibles:</h3>
+                    <ul id="adsList"></ul>
+                </div>
+            </section>
+
+            <section class="admin-section">
+                <h2>⚙️ Configuration</h2>
+                <div class="form-group">
+                    <label>Intervalle entre les pubs (vidéos):</label>
+                    <input type="number" id="adInterval" value="3" min="1">
+                    <small>Une pub tous les X vidéos</small>
+                </div>
+                <div class="form-group">
+                    <button onclick="saveConfig()" class="save-btn">💾 Sauvegarder</button>
+                    <button onclick="exportData()" class="export-btn">📥 Exporter</button>
+                    <button onclick="clearData()" class="delete-btn">🗑️ Supprimer</button>
+                </div>
+            </section>
+        </div>
+
+        <div class="admin-footer">
+            <p>© 2024 Télévision Admin</p>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
