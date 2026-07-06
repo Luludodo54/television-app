@@ -7,6 +7,7 @@ let tvData = {
     }
 };
 
+let videoStore = {};
 let currentChannelIndex = -1;
 let currentVideoIndex = 0;
 let videoCount = 0;
@@ -24,6 +25,43 @@ function loadData() {
     if (saved) {
         tvData = JSON.parse(saved);
     }
+    
+    // Charger les vidéos depuis IndexedDB
+    loadVideosFromIndexedDB();
+}
+
+// ===== INDEXED DB POUR GROS FICHIERS =====
+function initIndexedDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open('TelevisionDB', 1);
+        
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(request.result);
+        
+        request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('videos')) {
+                db.createObjectStore('videos', { keyPath: 'id' });
+            }
+        };
+    });
+}
+
+function loadVideosFromIndexedDB() {
+    initIndexedDB().then(db => {
+        const transaction = db.transaction(['videos'], 'readonly');
+        const store = transaction.objectStore('videos');
+        const request = store.getAll();
+        
+        request.onsuccess = () => {
+            videoStore = {};
+            request.result.forEach(video => {
+                videoStore[video.id] = video.data;
+            });
+        };
+    }).catch(err => {
+        console.log('IndexedDB non disponible');
+    });
 }
 
 // Initialiser le sélecteur de chaîne
@@ -111,7 +149,15 @@ function playNextVideo() {
     const currentVideoSpan = document.getElementById('currentVideo');
     const nextVideoSpan = document.getElementById('nextVideo');
     
-    videoPlayer.src = video.path;
+    // Récupérer le blob depuis IndexedDB
+    if (videoStore[video.id]) {
+        const blobUrl = URL.createObjectURL(new Blob([videoStore[video.id]], { type: 'video/mp4' }));
+        videoPlayer.src = blobUrl;
+    } else {
+        console.error('Vidéo non trouvée:', video.id);
+        return;
+    }
+    
     currentVideoSpan.textContent = video.title;
     
     // Afficher la prochaine vidéo
@@ -145,7 +191,16 @@ function playRandomAd() {
     const adPlayer = document.getElementById('adPlayer');
     const adCountdown = document.getElementById('adCountdown');
     
-    adPlayer.src = ad.path;
+    // Récupérer le blob depuis IndexedDB
+    if (videoStore[ad.id]) {
+        const blobUrl = URL.createObjectURL(new Blob([videoStore[ad.id]], { type: 'video/mp4' }));
+        adPlayer.src = blobUrl;
+    } else {
+        console.error('Pub non trouvée:', ad.id);
+        playNextVideo();
+        return;
+    }
+    
     adModal.classList.remove('hidden');
     
     let countdown = Math.ceil(ad.duration);
