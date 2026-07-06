@@ -1,0 +1,375 @@
+/* ===== STYLES GÉNÉRAUX ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #e0e0e0;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* ===== CONTENEUR ADMIN ===== */
+.admin-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: #0f3460;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+/* ===== EN-TÊTE ADMIN ===== */
+.admin-header {
+    background: linear-gradient(135deg, #2a9d8f 0%, #264653 100%);
+    padding: 30px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid #2a9d8f;
+}
+
+.admin-header h1 {
+    font-size: 2.5em;
+    color: #fff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.back-btn {
+    background: #fff;
+    color: #2a9d8f;
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== CONTENU ADMIN ===== */
+.admin-content {
+    padding: 40px 20px;
+}
+
+/* ===== SECTIONS ===== */
+.admin-section {
+    background: #1a1a2e;
+    padding: 30px;
+    margin-bottom: 30px;
+    border-radius: 10px;
+    border-left: 5px solid #2a9d8f;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+.admin-section h2 {
+    color: #2a9d8f;
+    margin-bottom: 25px;
+    font-size: 1.8em;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.admin-section h3 {
+    color: #e0e0e0;
+    margin-top: 25px;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    border-bottom: 2px solid #2a9d8f;
+    padding-bottom: 10px;
+}
+
+/* ===== GROUPES DE FORMULAIRE ===== */
+.form-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+    align-items: flex-end;
+}
+
+.form-group label {
+    color: #2a9d8f;
+    font-weight: bold;
+    font-size: 1em;
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+.form-group small {
+    color: #999;
+    font-size: 0.85em;
+    width: 100%;
+}
+
+/* ===== INPUTS ===== */
+.form-group input,
+.form-group select {
+    padding: 12px 15px;
+    background: #0f3460;
+    color: #e0e0e0;
+    border: 2px solid #2a9d8f;
+    border-radius: 8px;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    flex: 1;
+    min-width: 200px;
+}
+
+.form-group input::placeholder {
+    color: #666;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    background: #16213e;
+    border-color: #00d4d4;
+    box-shadow: 0 0 10px rgba(42, 157, 143, 0.3);
+    outline: none;
+}
+
+/* ===== BOUTONS ===== */
+button {
+    padding: 12px 25px;
+    background: linear-gradient(135deg, #2a9d8f 0%, #264653 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(42, 157, 143, 0.4);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+.save-btn {
+    background: linear-gradient(135deg, #2a9d8f 0%, #264653 100%);
+}
+
+.export-btn {
+    background: linear-gradient(135deg, #e76f51 0%, #d4703a 100%);
+}
+
+.delete-btn {
+    background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+}
+
+.delete-btn:hover {
+    box-shadow: 0 8px 20px rgba(233, 69, 96, 0.4);
+}
+
+/* ===== LISTES ===== */
+.channels-list,
+.videos-list,
+.ads-list {
+    margin-top: 20px;
+}
+
+.channels-list ul,
+.videos-list ul,
+.ads-list ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.channels-list li,
+.videos-list li,
+.ads-list li {
+    padding: 15px;
+    background: #0f3460;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 4px solid #2a9d8f;
+    transition: all 0.3s ease;
+}
+
+.channels-list li:hover,
+.videos-list li:hover,
+.ads-list li:hover {
+    background: #16213e;
+    transform: translateX(5px);
+    box-shadow: 0 5px 15px rgba(42, 157, 143, 0.2);
+}
+
+.item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+}
+
+.item-name {
+    color: #e0e0e0;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.item-desc {
+    color: #999;
+    font-size: 0.9em;
+}
+
+.item-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.item-actions button {
+    padding: 8px 15px;
+    font-size: 0.85em;
+    background: #e94560;
+}
+
+.item-actions button:hover {
+    background: #ff6b6b;
+}
+
+/* ===== PIED DE PAGE ===== */
+.admin-footer {
+    background: #1a1a2e;
+    padding: 20px;
+    text-align: center;
+    color: #999;
+    border-top: 2px solid #2a9d8f;
+}
+
+/* ===== NOTIFICATIONS ===== */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    background: #2a9d8f;
+    color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s;
+    z-index: 999;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+    .form-group {
+        flex-direction: column;
+    }
+
+    .form-group input,
+    .form-group select {
+        min-width: 100%;
+        flex: 1;
+    }
+
+    button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .admin-header h1 {
+        font-size: 2em;
+    }
+
+    .admin-section {
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .admin-section h2 {
+        font-size: 1.4em;
+    }
+
+    .channels-list li,
+    .videos-list li,
+    .ads-list li {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+
+    .item-actions {
+        width: 100%;
+    }
+
+    .item-actions button {
+        flex: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-header h1 {
+        font-size: 1.5em;
+    }
+
+    .admin-content {
+        padding: 20px 10px;
+    }
+
+    .admin-section {
+        padding: 15px;
+    }
+
+    .form-group {
+        gap: 10px;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 10px;
+    }
+
+    button {
+        padding: 10px;
+        font-size: 0.9em;
+    }
+}
