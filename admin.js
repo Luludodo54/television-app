@@ -7,6 +7,9 @@ let tvData = {
     }
 };
 
+// Stockage des fichiers vidéo avec clés
+let videoStore = {};
+
 // Charger les données au démarrage
 window.addEventListener('DOMContentLoaded', () => {
     loadData();
@@ -22,6 +25,59 @@ function loadData() {
     if (saved) {
         tvData = JSON.parse(saved);
     }
+    
+    // Charger le store vidéo depuis IndexedDB si disponible
+    loadVideosFromIndexedDB();
+}
+
+// ===== INDEXED DB POUR GROS FICHIERS =====
+function initIndexedDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open('TelevisionDB', 1);
+        
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(request.result);
+        
+        request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('videos')) {
+                db.createObjectStore('videos', { keyPath: 'id' });
+            }
+        };
+    });
+}
+
+function loadVideosFromIndexedDB() {
+    initIndexedDB().then(db => {
+        const transaction = db.transaction(['videos'], 'readonly');
+        const store = transaction.objectStore('videos');
+        const request = store.getAll();
+        
+        request.onsuccess = () => {
+            videoStore = {};
+            request.result.forEach(video => {
+                videoStore[video.id] = video.data;
+            });
+        };
+    }).catch(err => {
+        console.log('IndexedDB non disponible, utilisation de localStorage');
+    });
+}
+
+function saveVideoToIndexedDB(videoId, blob) {
+    initIndexedDB().then(db => {
+        const transaction = db.transaction(['videos'], 'readwrite');
+        const store = transaction.objectStore('videos');
+        
+        store.put({
+            id: videoId,
+            data: blob
+        });
+        
+        videoStore[videoId] = blob;
+    }).catch(err => {
+        console.log('Impossible de sauvegarder en IndexedDB');
+    });
 }
 
 // Sauvegarder les données
@@ -71,6 +127,13 @@ function addChannel() {
 
 function deleteChannel(index) {
     if (confirm('Êtes-vous sûr de supprimer cette chaîne?')) {
+        const channel = tvData.channels[index];
+        // Supprimer les vidéos associées
+        if (channel.videos) {
+            channel.videos.forEach(video => {
+                deleteVideoFromStorage(video.id);
+            });
+        }
         tvData.channels.splice(index, 1);
         saveData();
         refreshChannels();
@@ -148,38 +211,78 @@ function addVideo() {
         return;
     }
     
-    // Convertir le fichier en base64
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const video = {
-            id: Date.now(),
-            title: title,
-            path: e.target.result,
-            duration: duration,
-            filename: file.name
-        };
-        
-        tvData.channels[channelIndex].videos.push(video);
-        saveData();
-        
-        titleInput.value = '';
-        fileInput.value = '';
-        durationInput.value = '';
-        
-        loadChannelVideos();
-        showNotification('✅ Vidéo ajoutée!');
+    // Vérifier la taille du fichier
+    const maxSize = 500 * 1024 * 1024; // 500 MB
+    if (file.size > maxSize) {
+        showNotification('❌ Le fichier est trop gros (max 500 MB)', true);
+        return;
+    }
+    
+    showNotification('⏳ Ajout de la vidéo en cours...');
+    
+    const videoId = Date.now().toString();
+    
+    // Créer l'objet vidéo (sans les données)
+    const video = {
+        id: videoId,
+        title: title,
+        duration: duration,
+        filename: file.name,
+        size: file.size
     };
     
-    reader.readAsDataURL(file);
+    // Sauvegarder le fichier dans IndexedDB
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            // Essayer IndexedDB d'abord
+            saveVideoToIndexedDB(videoId, e.target.result);
+            
+            tvData.channels[channelIndex].videos.push(video);
+            saveData();
+            
+            titleInput.value = '';
+            fileInput.value = '';
+            durationInput.value = '';
+            
+            loadChannelVideos();
+            showNotification('✅ Vidéo ajoutée avec succès!');
+        } catch (error) {
+            showNotification('❌ Erreur lors de l\'ajout de la vidéo', true);
+            console.error(error);
+        }
+    };
+    
+    reader.onerror = () => {
+        showNotification('❌ Erreur lors de la lecture du fichier', true);
+    };
+    
+    reader.readAsArrayBuffer(file);
 }
 
 function deleteVideo(channelIndex, videoIndex) {
     if (confirm('Êtes-vous sûr de supprimer cette vidéo?')) {
+        const video = tvData.channels[channelIndex].videos[videoIndex];
+        deleteVideoFromStorage(video.id);
         tvData.channels[channelIndex].videos.splice(videoIndex, 1);
         saveData();
         loadChannelVideos();
         showNotification('✅ Vidéo supprimée!');
     }
+}
+
+function deleteVideoFromStorage(videoId) {
+    // Supprimer de IndexedDB
+    initIndexedDB().then(db => {
+        const transaction = db.transaction(['videos'], 'readwrite');
+        const store = transaction.objectStore('videos');
+        store.delete(videoId);
+    }).catch(err => {
+        console.log('Impossible de supprimer de IndexedDB');
+    });
+    
+    // Supprimer du store local
+    delete videoStore[videoId];
 }
 
 function loadChannelVideos() {
@@ -202,11 +305,12 @@ function loadChannelVideos() {
     }
     
     channel.videos.forEach((video, index) => {
+        const sizeInMB = (video.size / (1024 * 1024)).toFixed(2);
         const li = document.createElement('li');
         li.innerHTML = `
             <div class="item-info">
                 <span class="item-name">🎬 ${video.title}</span>
-                <span class="item-desc">Durée: ${video.duration}s</span>
+                <span class="item-desc">Durée: ${video.duration}s | Taille: ${sizeInMB} MB</span>
             </div>
             <div class="item-actions">
                 <button onclick="deleteVideo(${channelIndex}, ${index})">🗑️ Supprimer</button>
@@ -241,33 +345,57 @@ function addAd() {
         return;
     }
     
-    // Convertir le fichier en base64
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const ad = {
-            id: Date.now(),
-            title: title,
-            path: e.target.result,
-            duration: duration,
-            filename: file.name
-        };
-        
-        tvData.ads.push(ad);
-        saveData();
-        
-        titleInput.value = '';
-        fileInput.value = '';
-        durationInput.value = '';
-        
-        refreshAds();
-        showNotification('✅ Pub ajoutée!');
+    const maxSize = 500 * 1024 * 1024; // 500 MB
+    if (file.size > maxSize) {
+        showNotification('❌ Le fichier est trop gros (max 500 MB)', true);
+        return;
+    }
+    
+    showNotification('⏳ Ajout de la pub en cours...');
+    
+    const adId = Date.now().toString();
+    
+    // Créer l'objet pub (sans les données)
+    const ad = {
+        id: adId,
+        title: title,
+        duration: duration,
+        filename: file.name,
+        size: file.size
     };
     
-    reader.readAsDataURL(file);
+    // Sauvegarder le fichier dans IndexedDB
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            saveVideoToIndexedDB(adId, e.target.result);
+            
+            tvData.ads.push(ad);
+            saveData();
+            
+            titleInput.value = '';
+            fileInput.value = '';
+            durationInput.value = '';
+            
+            refreshAds();
+            showNotification('✅ Pub ajoutée avec succès!');
+        } catch (error) {
+            showNotification('❌ Erreur lors de l\'ajout de la pub', true);
+            console.error(error);
+        }
+    };
+    
+    reader.onerror = () => {
+        showNotification('❌ Erreur lors de la lecture du fichier', true);
+    };
+    
+    reader.readAsArrayBuffer(file);
 }
 
 function deleteAd(index) {
     if (confirm('Êtes-vous sûr de supprimer cette pub?')) {
+        const ad = tvData.ads[index];
+        deleteVideoFromStorage(ad.id);
         tvData.ads.splice(index, 1);
         saveData();
         refreshAds();
@@ -285,11 +413,12 @@ function refreshAds() {
     }
     
     tvData.ads.forEach((ad, index) => {
+        const sizeInMB = (ad.size / (1024 * 1024)).toFixed(2);
         const li = document.createElement('li');
         li.innerHTML = `
             <div class="item-info">
                 <span class="item-name">📢 ${ad.title}</span>
-                <span class="item-desc">Durée: ${ad.duration}s</span>
+                <span class="item-desc">Durée: ${ad.duration}s | Taille: ${sizeInMB} MB</span>
             </div>
             <div class="item-actions">
                 <button onclick="deleteAd(${index})">🗑️ Supprimer</button>
@@ -329,11 +458,18 @@ function exportData() {
     a.click();
     
     URL.revokeObjectURL(url);
-    showNotification('✅ Données exportées!');
+    showNotification('✅ Données exportées (sans les vidéos)!');
 }
 
 function clearData() {
     if (confirm('⚠️ Êtes-vous VRAIMENT sûr? Toutes les données seront supprimées!')) {
+        // Supprimer de IndexedDB
+        initIndexedDB().then(db => {
+            const transaction = db.transaction(['videos'], 'readwrite');
+            const store = transaction.objectStore('videos');
+            store.clear();
+        });
+        
         tvData = {
             channels: [],
             ads: [],
@@ -341,6 +477,7 @@ function clearData() {
                 adInterval: 3
             }
         };
+        videoStore = {};
         saveData();
         refreshChannels();
         refreshAds();
